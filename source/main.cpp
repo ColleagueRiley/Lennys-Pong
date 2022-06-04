@@ -2,10 +2,12 @@
 
 RSGL::window win("Lenny's Pong",{500,500,1000,500},{0,0,0});
 bool running=true, init=false;
+#include <math.h>
 
-int paddleSpeed=17,ballSpeed=3;
+int paddleSpeed=17,ballSpeed=3, playerOneScore=0, playerTwoScore=0;
 RSGL::rect paddle1={20,0,48,144}, paddle2= {win.r.width-80,0,48,144};
-RSGL::circle ball={win.r.width/2-34,win.r.length/2-34,34};
+//RSGL::circle ball={win.r.width/2-48,win.r.length/2-48,48};
+RSGL::circle ball  = {win.r.width/2-48,win.r.length/2-48,48};
 
 int main(){
     srand(time(NULL)); RSGL::point ballDir={0,0};
@@ -34,17 +36,17 @@ int main(){
             ballDir.x=ballDir.x*-1;
         }
         // if the ball hits the top/bottom of thte screen
-        if (ball.y > win.r.length-ball.radius || ball.y < ball.radius) ballDir.y=ballDir.y*-1;
+        if (ball.y > win.r.length-ball.radius || ball.y < ball.radius-ball.radius) ballDir.y=ballDir.y*-1;
         // if ball goes too far
         if (ball.x > win.r.width-ball.radius || ball.x < 0){
+            if (ball.x < 0) playerTwoScore++; else playerOneScore++;
             ballDir = {0,0}; paddle1.y=0; paddle2.y=0; init=false;
             ball.x=win.r.width/2-48; ball.y=win.r.length/2-48;
         }
-        // draw the paddles
-        RSGL::drawRect({paddle1.x,paddle1.y,paddle1.width,paddle1.length*(2/4)},{255,0,0});
+        // draw the paddles and score
         RSGL::drawSVG("res/images/paddle.svg",paddle1);
         RSGL::drawSVG("res/images/paddle.svg",paddle2);
-        RSGL::drawSVG("res/images/ball.svg",{ball.x-7,ball.y-7,48,48});
+        RSGL::drawSVG("res/images/ball.svg",{ball.x,ball.y,48,48});
         win.clear(); // clear the screen for next frame
     }
 }
