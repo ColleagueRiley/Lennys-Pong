@@ -1,0 +1,9 @@
+SOURCE += source/*.cpp
+LIBS += -lRSGL -lGL
+ARGS += -g
+OUTPUT = Lennys-Pong
+GXX = g++
+
+pash{
+    ./$(OUTPUT)
+}
