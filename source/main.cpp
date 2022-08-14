@@ -4,10 +4,13 @@
 RSGL::window win("Lenny's Pong",{500,500,1000,500},{0,0,0});
 bool running=true, init=false;
 
-int paddleSpeed=17,ballSpeed=3, playerOneScore=0, playerTwoScore=0, aimode=0;
+int paddleSpeed=17,ballSpeed=4, playerOneScore=0, playerTwoScore=0, aimode=0, training=0;
 RSGL::rect paddle1={20,0,48,144}, paddle2= {win.r.width-80,0,48,144};
 RSGL::circle ball  = {win.r.width/2-48,win.r.length/2-48,48};
 
+
+bool b; int choice;
+std::map<bool,std::vector<int>> choices;
 bool AI(int ballY, int paddleY, int type);
 
 int main(){
@@ -28,12 +31,13 @@ int main(){
                 break;
             default: break;
         }
+        if (training && !init) init=true;
         // ball physics
         if (init) while (!ballDir.x || !ballDir.y) ballDir = {(rand() % 3)-1,(rand() % 3)-1}; 
         ball.x+=ballDir.x*ballSpeed; ball.y+=ballDir.y*ballSpeed;
         // if the paddle hits a paddle
-        if ( (RSGL::CircleCollideRect(ball,paddle1) || RSGL::CircleCollideRect(ball,paddle2)) && hitFrame!=frame){
-            if (RSGL::CircleCollideRect(ball,{paddle1.x,paddle1.y,paddle1.width,paddle1.length/2}) || RSGL::CircleCollideRect(ball,{paddle2.x,paddle2.y,paddle2.width,paddle2.length/2})) ballDir.y = 1; // if it hits the top half
+        if ( (RSGL::RectCollideRect({ball.x,ball.y,ball.radius,ball.radius},paddle1) || RSGL::RectCollideRect({ball.x,ball.y,ball.radius,ball.radius},paddle2)) && hitFrame!=frame){
+            if (RSGL::RectCollideRect({ball.x,ball.y,ball.radius,ball.radius},{paddle1.x,paddle1.y,paddle1.width,paddle1.length/2}) || RSGL::RectCollideRect({ball.x,ball.y,ball.radius,ball.radius},{paddle2.x,paddle2.y,paddle2.width,paddle2.length/2})) ballDir.y = 1; // if it hits the top half
             else  ballDir.y = -1; // if it only hits the first half
             ballDir.x=ballDir.x*-1; hitFrame=frame;
         }
@@ -41,13 +45,23 @@ int main(){
         if (ball.y > win.r.length-ball.radius || ball.y < ball.radius-ball.radius) ballDir.y=ballDir.y*-1;
         // if ball goes too far
         if (ball.x > win.r.width-ball.radius || ball.x < 0){
-            if (ball.x < 0) playerTwoScore++; else playerOneScore++;
+            if (ball.x < 0) playerTwoScore++; 
+            else{ 
+                if (aimode == 2 && !choices.empty()){ 
+                    choices.at( b ).at(choice)--;
+                }
+                playerOneScore++;
+            }
             ballDir = {0,0}; paddle1.y=0; paddle2.y=0; init=false;
             ball.x=win.r.width/2-48; ball.y=win.r.length/2-48;
         } 
         // AI
-        if (AI(paddle2.y,ball.y,aimode-1) && init && aimode && paddle2.y > 0) paddle2.y-=paddleSpeed; 
-        else if (!AI(paddle2.y,ball.y,aimode-1) && init && aimode &&  paddle2.y < win.r.length-paddle2.length ) paddle2.y+=paddleSpeed;
+        if (AI(paddle2.y,ball.y,aimode-1) && init && aimode && paddle2.y > 0 && ballDir.x > 0 ) paddle2.y-=paddleSpeed; 
+        else if (!AI(paddle2.y,ball.y,aimode-1) && init && aimode &&  paddle2.y < win.r.length-paddle2.length && ballDir.x  > 0 ) paddle2.y+=paddleSpeed;
+        if (training && ballDir.x < 0){
+            if (AI(paddle1.y,ball.y,0) && init && aimode && paddle1.y > 0) paddle1.y-=paddleSpeed; 
+            else if (!AI(paddle1.y,ball.y,0) && init && aimode &&  paddle1.y < win.r.length-paddle1.length ) paddle1.y+=paddleSpeed;
+        }
         // draw the paddles and score
         RSGL::drawText(std::to_string(playerOneScore),{win.r.width/2-40,20,20},"res/fonts/PublicPixel.ttf",{255,255,255});
         RSGL::drawText(std::to_string(playerTwoScore),{win.r.width/2+40,20,20},"res/fonts/PublicPixel.ttf",{255,255,255});
@@ -59,12 +73,17 @@ int main(){
 }
 
 bool AI(int ballY, int paddleY, int type){
-    int downDist=abs(ballY - (ballY+paddleSpeed) ), upDist=abs(ballY - (ballY-paddleSpeed));
-    if (!type){ if ( downDist > upDist) return true; else if ( downDist < upDist) return false; }
+    int downDist=abs(ballY - (paddleY+paddleSpeed) ), upDist=abs(ballY - (paddleY-paddleSpeed));
+    if (!type){ if ( downDist < upDist ) return true; else if ( downDist > upDist) return false; }
     else if (type == 1){
-
+        b= downDist < upDist || downDist == upDist;
+        if ( choices.find(b) != choices.end() ) choice = choices.at(b).at(0) > choices.at(b).at(1);
+        choice = rand() % 2; 
+        return choice;
     }
     if (type == 2){
-        
+        int bad = rand() % 100;
+        if (bad > 65){ downDist += rand() % 500-250; upDist += rand() % 500-250; }
+        if ( downDist < upDist ) return true; else if ( downDist > upDist) return false;
     }
 }

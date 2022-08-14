@@ -1,5 +1,5 @@
 SOURCE += source/*.cpp
-LIBS += -lRSGL -lGL
+LIBS += $(RSGL-static)
 ARGS += -g
 OUTPUT = Lennys-Pong
 GXX = g++
