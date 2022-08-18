@@ -1,1 +1,1 @@
-/usr/share/Lennys-Pong/Lennys-Pong
+cd /usr/share/Lennys-Pong && ./Lennys-Pong
