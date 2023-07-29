@@ -1,9 +1,0 @@
-SOURCE += source/*.cpp
-LIBS += $(RSGL-static)
-ARGS += -g
-OUTPUT = Lennys-Pong
-GXX = g++
-
-pash{
-    ./$(OUTPUT)
-}
