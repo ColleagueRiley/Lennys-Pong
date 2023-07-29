@@ -24,13 +24,13 @@ const char* font_ttfs[] = {
     "~/.fonts/NotoSansNerdFontPropo-Regular.ttf"
 };
 
-#ifdef __unix__
+#if defined(__unix__) && !defined(_WIN32)
 #include <sys/stat.h>
 #endif
 
 inline bool si_path_exists(char* path);
 bool si_path_exists(char* path) {
-	#if defined(SI_SYSTEM_WINDOWS)
+	#if defined(_WIN32)
 		DWORD file_attrib = GetFileAttributes(path);
 		return file_attrib != INVALID_FILE_ATTRIBUTES;
 	#else
