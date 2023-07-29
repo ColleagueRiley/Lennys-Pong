@@ -41,6 +41,7 @@ char* si_u64_to_cstr(size_t num) {
 
 int main(int argc, char** argv) {
     RSGL_window* win = RSGL_createWindow("Lenny's Pong", RSGL_RECT(0,0,1000,500), RGFW_CENTER);
+    RSGL_window_clear(win, RSGL_RGB(0, 0, 0));
 
     RSGL_rect paddles[2] = {{30, 30, 48, 144}, {926, 30, 48, 144}};
     
